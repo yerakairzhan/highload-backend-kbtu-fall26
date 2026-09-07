@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 2s        # scrape often so short load tests still show up
+  evaluation_interval: 2s
+
+scrape_configs:
+  - job_name: highload
+    static_configs:
+      # host.docker.internal = the Go server running on your host machine.
+      - targets: ["host.docker.internal:8080"]

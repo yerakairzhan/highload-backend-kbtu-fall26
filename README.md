@@ -1,24 +1,102 @@
-# Highload Backend — KBTU, Fall 2026
+# Percentiles — Go (stdlib only)
 
-Course repository for **Highload Backend** at KBTU.
+Небольшой проект про перцентили (p50/p95/p99) и оценку ёмкости (capacity).
+Три эндпоинта с разной скоростью + скрипт нагрузки на 200 запросов.
 
-Each week's work lives on its own branch. `main` stays as an index; the code for a
-given week is on that week's branch.
+## Технологии
 
-## Weeks
+Только стандартная библиотека Go (`net/http`). Никаких фреймворков и внешних
+зависимостей.
 
-| Week | Branch | Topic |
-|------|--------|-------|
-| 1 | [`week-1`](../../tree/week-1) | Percentiles (p50/p95/p99), capacity estimation, load testing, Prometheus + Grafana |
+## Структура
 
-## How to use
-
-```bash
-# list branches
-git branch -a
-
-# check out a week's code
-git checkout week-1
+```
+main.go              запуск сервера (маршруты, таймауты)
+handlers.go          профили задержки + обработчики + логирование
+metrics.go           системная гистограмма Prometheus + эндпоинт /metrics
+config.json          параметры нагрузки (кол-во запросов, воркеры, target RPS)
+loadtest/
+  main.go            генератор нагрузки (пул воркеров + случайный план)
+  config.go          чтение config.json
+  stats.go           перцентили и статистика
+  report.go          таблица, оценка ёмкости, сравнение
+monitoring/
+  docker-compose.yml Prometheus + Grafana
+  prometheus.yml     конфиг скрейпа
+  grafana/           datasource + дашборд «System Percentiles»
 ```
 
-Each week's branch contains its own README with setup and run instructions.
+## Конфиг (`config.json`)
+
+Параметры нагрузки вынесены в файл, а не зашиты в коде:
+
+```json
+{
+  "url": "http://localhost:8080",
+  "requests": 200,
+  "concurrency": 20,
+  "target_rps": 500
+}
+```
+
+Флаги при желании перекрывают любое значение из конфига:
+`go run ./loadtest -n 500 -c 50` или `-config other.json`.
+
+## Экспорт в Grafana (по системе в целом)
+
+Сервер отдаёт **одну общую гистограмму по всей системе** на `/metrics` (без
+разбивки по эндпоинтам). Prometheus её собирает, Grafana рисует системные
+p50/p95/p99 и суммарный RPS.
+
+```bash
+# 1) запусти сервер на хосте
+go run .
+
+# 2) подними стек мониторинга
+cd monitoring && docker compose up -d
+
+# 3) создай ПОСТОЯННУЮ нагрузку (иначе графики будут пустыми — см. ниже)
+go run ./loadtest -duration 120s
+
+# 4) открой дашборд «System Percentiles»
+#    Grafana:    http://localhost:3000   (admin / admin)
+#    Prometheus: http://localhost:9090
+```
+
+> **Почему графики пустые, если запустить обычный `go run ./loadtest`?**
+> Дашборд рисует `rate(...)` — скорость роста счётчиков. Разовый прогон на
+> 200 запросов длится ~1.3 с и останавливается, счётчик замирает, `rate` = 0,
+> а `histogram_quantile` даёт `NaN` — рисовать нечего. Нужен **непрерывный**
+> трафик: флаг `-duration` шлёт запросы в течение заданного времени
+> (например `-duration 120s`), и графики оживают.
+
+Grafana считает системный перцентиль прямо из гистограммы (без `by (endpoint)`):
+
+```promql
+histogram_quantile(0.95,
+  sum(rate(http_request_duration_seconds_bucket[$__rate_interval])) by (le))
+```
+
+## Эндпоинты
+
+| Эндпоинт   | Задержка   | Что имитирует                 |
+|------------|------------|-------------------------------|
+| `/fast`    | ~5–10 мс   | кэш / память                  |
+| `/average` | ~50–80 мс  | пара запросов в БД            |
+| `/slow`    | ~200–600 мс| внешний вызов / тяжёлый расчёт |
+
+## Запуск
+
+```bash
+# терминал 1 — сервер на :8080
+go run .
+
+# терминал 2 — нагрузка (параметры берутся из config.json)
+go run ./loadtest
+```
+
+## Что считает скрипт
+
+1. **Перцентили** p50/p95/p99 по каждому эндпоинту и в целом.
+2. **Ёмкость** — сколько воркеров нужно под целевой RPS (закон Литтла, по p95).
+3. **Сравнение** трёх эндпоинтов.

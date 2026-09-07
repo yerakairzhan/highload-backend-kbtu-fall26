@@ -1,0 +1,6 @@
+{
+  "url": "http://localhost:8080",
+  "requests": 200,
+  "concurrency": 20,
+  "target_rps": 500
+}
