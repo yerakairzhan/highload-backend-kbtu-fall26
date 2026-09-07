@@ -1,0 +1,32 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/bin/
+/dist/
+
+# Go workspace / deps
+go.work
+go.work.sum
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / local runtime
+*.log
+/tmp/
+
+# Monitoring local state
+monitoring/grafana/data/
+monitoring/prometheus/data/
