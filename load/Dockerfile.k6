@@ -1,0 +1,5 @@
+# k6 for the HTTP/1.1 and HTTP/2 load runs, plus iproute2 for netem and
+# python3 for parsing k6 JSON summaries.
+FROM grafana/k6:latest
+USER root
+RUN apk add --no-cache iproute2 iputils bash python3

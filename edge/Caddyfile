@@ -1,0 +1,42 @@
+{
+	# We supply our own self-signed cert; don't let Caddy try to manage certs.
+	auto_https off
+
+	# :9443 answers HTTP/3, HTTP/2 and HTTP/1.1 at once. ALPN + the QUIC
+	# Alt-Svc advert let the client pick. This is the endpoint for the h2 and
+	# h3 runs.
+	servers :9443 {
+		protocols h1 h2 h3
+	}
+
+	# :9444 offers ONLY http/1.1 in ALPN. Pointing k6 here forces a genuine
+	# HTTP/1.1 run — it cannot silently upgrade to h2. This avoids the classic
+	# failure mode where all three runs were secretly HTTP/1.1.
+	servers :9444 {
+		protocols h1
+	}
+}
+
+# --- h3 / h2 / http1.1 edge -------------------------------------------------
+# Bare ":9443" matches ANY Host header. A hostname here (e.g.
+# https://localhost:9443) would match only Host: localhost, and requests to
+# "edge:9443" would get an empty 200 from Caddy without ever being proxied —
+# a perfectly plausible result that measures nothing.
+:9443 {
+	tls /certs/cert.pem /certs/key.pem
+	reverse_proxy https://service:8443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# --- http/1.1-only edge -----------------------------------------------------
+:9444 {
+	tls /certs/cert.pem /certs/key.pem
+	reverse_proxy https://service:8443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}

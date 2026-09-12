@@ -1,0 +1,71 @@
+# Week 2 rig. Everything runs in Linux containers so netem works and we get
+# HTTP/3-capable tooling on a macOS host.
+#
+# Topology (two networks, on purpose):
+#
+#   [client] --frontend-- [edge] --backend-- [service]
+#
+# netem is applied on the FRONTEND link only (client + edge frontend iface),
+# so the impairment hits the client<->edge path where the protocol is
+# negotiated. The edge<->service hop stays clean, so h3's backend leg (which is
+# h2-over-TCP) does not pollute the h2-vs-h3 loss comparison.
+
+services:
+  service:
+    build: ./service
+    networks: [backend]
+    volumes:
+      - ./certs:/certs:ro
+    restart: unless-stopped
+
+  edge:
+    build: ./edge
+    depends_on: [service]
+    networks: [frontend, backend]
+    cap_add: [NET_ADMIN] # required for tc/netem
+    volumes:
+      - ./edge/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - ./netem:/netem:ro
+    command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+    ports:
+      - "9443:9443/tcp" # h2 + http/1.1
+      - "9443:9443/udp" # h3 (QUIC) - MUST be open or you get silent h2 fallback
+      - "9444:9444/tcp" # http/1.1-only listener
+    restart: unless-stopped
+
+  # k6 drives the HTTP/1.1 and HTTP/2 runs. Kept alive so we can apply netem on
+  # its frontend interface and exec runs into it.
+  k6:
+    build:
+      context: ./load
+      dockerfile: Dockerfile.k6
+    depends_on: [edge]
+    networks: [frontend]
+    cap_add: [NET_ADMIN]
+    volumes:
+      - ./load:/load
+      - ./results:/results
+      - ./netem:/netem
+    working_dir: /load
+    entrypoint: ["sleep", "infinity"]
+
+  # h3 tooling: a quic-go client (real HTTP/3 load + version proof). Used
+  # instead of curl-http3/h2load because those have no arm64 image.
+  client:
+    build:
+      context: ./load
+      dockerfile: Dockerfile.client
+    depends_on: [edge]
+    networks: [frontend]
+    cap_add: [NET_ADMIN]
+    volumes:
+      - ./load:/load
+      - ./results:/results
+      - ./netem:/netem
+    working_dir: /load
+    entrypoint: ["sleep", "infinity"]
+
+networks:
+  frontend:
+  backend:
