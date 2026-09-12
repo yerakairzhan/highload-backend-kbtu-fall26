@@ -35,3 +35,6 @@ monitoring/prometheus/data/
 # certs/gen-cert.sh); keep compact result summaries, drop the raw k6 dumps
 certs/*.pem
 results/*.full.json
+
+# Python bytecode (make-report.py)
+__pycache__/
