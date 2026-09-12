@@ -10,6 +10,7 @@ given week is on that week's branch.
 | Week | Branch | Topic |
 |------|--------|-------|
 | 1 | [`week-1`](../../tree/week-1) | Percentiles (p50/p95/p99), capacity estimation, load testing, Prometheus + Grafana |
+| 2 | [`week-2`](../../tree/week-2) | HTTP/1.1 vs HTTP/2 vs HTTP/3 load testing: TLS handshake cost, connection pooling, netem impairment (Go + Caddy + k6 + quic-go) |
 
 ## How to use
 
