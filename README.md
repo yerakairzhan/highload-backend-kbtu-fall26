@@ -9,11 +9,23 @@ are in **[REPORT.md](REPORT.md)**.
 Everything runs in Linux containers (Docker Compose), because `netem` is a
 Linux qdisc and the macOS host has no HTTP/3-capable `curl`.
 
-```
-[k6 | h3client] --frontend--> [Caddy edge :9443 / :9444] --backend--> [Go service :8443]
-  load generators              h3 + h2 + http/1.1   |   h1-only         h2 + http/1.1 (TLS 1.3, ALPN)
-                                                     ^
-                                    netem (100 ms / 1 % loss) applied on THIS link only
+```mermaid
+flowchart LR
+    subgraph FE["frontend network · netem here only: delay 100 ms ± 10 ms, loss 1 %, both directions"]
+        direction TB
+        K6["k6 v2.2<br/>HTTP/1.1 · HTTP/2<br/>constant-arrival-rate, 300 req/s"]
+        H3C["h3client · Go + quic-go<br/>HTTP/3 load · version prover<br/>-conns N (connection model)"]
+    end
+
+    EDGE["Caddy 2.8 edge<br/>:9443 → h3 · h2 · http/1.1<br/>:9444 → http/1.1 only (forced h1 run)<br/>TLS 1.3, self-signed EC cert"]
+
+    subgraph BE["backend network · never impaired"]
+        SVC["Go service :8443<br/>net/http · TLS 1.3 · ALPN h2 + http/1.1<br/>GET /api/quote/{id} → 37 B JSON"]
+    end
+
+    K6  -- "TLS over TCP" --> EDGE
+    H3C -- "TLS over TCP, or QUIC/UDP" --> EDGE
+    EDGE -- "reverse_proxy https (h2)" --> SVC
 ```
 
 | Component | What | Why |
