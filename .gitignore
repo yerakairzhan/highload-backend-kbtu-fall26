@@ -30,3 +30,6 @@ Thumbs.db
 # Monitoring local state
 monitoring/grafana/data/
 monitoring/prometheus/data/
+
+# Copyrighted textbooks kept locally only - listed by title in README
+books/
