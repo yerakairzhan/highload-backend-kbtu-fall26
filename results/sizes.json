@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "get_post",
+    "direction": "request",
+    "message": "IdRequest",
+    "proto_bytes": 10,
+    "json_bytes": 27,
+    "json_to_proto": 2.7
+  },
+  {
+    "scenario": "get_post",
+    "direction": "response",
+    "message": "Post",
+    "proto_bytes": 10258,
+    "json_bytes": 10787,
+    "json_to_proto": 1.0515695067264574
+  },
+  {
+    "scenario": "list_comments",
+    "direction": "request",
+    "message": "CommentListRequest",
+    "proto_bytes": 12,
+    "json_bytes": 44,
+    "json_to_proto": 3.6666666666666665
+  },
+  {
+    "scenario": "list_comments",
+    "direction": "response",
+    "message": "CommentList",
+    "proto_bytes": 7350,
+    "json_bytes": 10325,
+    "json_to_proto": 1.4047619047619047
+  },
+  {
+    "scenario": "create_comment",
+    "direction": "request",
+    "message": "CommentCreate",
+    "proto_bytes": 351,
+    "json_bytes": 401,
+    "json_to_proto": 1.1424501424501425
+  },
+  {
+    "scenario": "create_comment",
+    "direction": "response",
+    "message": "Comment",
+    "proto_bytes": 360,
+    "json_bytes": 495,
+    "json_to_proto": 1.375
+  }
+]

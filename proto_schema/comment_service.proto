@@ -1,0 +1,17 @@
+syntax = "proto2";
+package blog;
+
+import "comment.proto";
+import "general.proto";
+
+option go_package = "./pb";
+
+service CommentService {
+  rpc CreateComment(CommentCreate) returns (Comment) {}
+  rpc ListComments(CommentListRequest) returns (CommentList) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc DeleteComment(IdRequest) returns (EmptyMessageResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}

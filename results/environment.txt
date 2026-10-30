@@ -1,0 +1,4 @@
+date: 2026-10-30T07:04:35Z
+host: Apple M5, 10 cores
+docker: 28.5.2, 10 CPUs, 8217448448 B
+server: 2 CPUs | loadgen: 4 CPUs | 2000 RPS open loop | 20s measured after 5s warm-up | 3 reps

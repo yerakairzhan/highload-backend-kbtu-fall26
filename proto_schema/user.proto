@@ -1,0 +1,22 @@
+syntax = "proto2";
+package blog;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./pb";
+
+message User {
+  required uint64 id = 1 [json_name = "id"];
+  required string username = 2 [json_name = "username"];
+  optional string display_name = 3 [json_name = "display_name"];
+  optional string bio = 4 [json_name = "bio"];
+
+  required google.protobuf.Timestamp created_at = 101 [json_name = "created_at"];
+}
+
+// Only the fields that are set change.
+message UserUpdate {
+  optional string username = 1 [json_name = "username"];
+  optional string display_name = 2 [json_name = "display_name"];
+  optional string bio = 3 [json_name = "bio"];
+}

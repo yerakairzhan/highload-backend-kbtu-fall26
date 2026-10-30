@@ -1,0 +1,19 @@
+syntax = "proto2";
+package blog;
+
+import "general.proto";
+import "user.proto";
+
+option go_package = "./pb";
+
+service UserService {
+  rpc GetMe(EmptyMessageRequest) returns (User) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc GetUser(IdRequest) returns (User) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc UpdateProfile(UserUpdate) returns (User) {
+    option idempotency_level = IDEMPOTENT;
+  }
+}

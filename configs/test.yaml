@@ -1,0 +1,14 @@
+port: "0"
+rpc_timeout: 2s
+log:
+  level: WARN
+seed:
+  enabled: false
+  users: 2
+  user_password: test-password
+jwt:
+  secret: test-secret
+  access_ttl: 15m
+  refresh_ttl: 720h
+s3:
+  enabled: false

@@ -1,0 +1,31 @@
+syntax = "proto2";
+package blog;
+
+import "general.proto";
+import "post.proto";
+
+option go_package = "./pb";
+
+// idempotency_level is read by the client retry interceptor: only calls marked
+// NO_SIDE_EFFECTS or IDEMPOTENT, or creates that carry an idempotency_key, are
+// retried.
+service PostService {
+  rpc CreatePost(PostCreate) returns (Post) {}
+  rpc GetPost(IdRequest) returns (Post) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc UpdatePost(PostUpdate) returns (Post) {}
+  rpc DeletePost(IdRequest) returns (EmptyMessageResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  rpc ListPosts(PostListRequest) returns (PostList) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc LikePost(PostLikeRequest) returns (EmptyMessageResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  rpc UnlikePost(PostLikeRequest) returns (EmptyMessageResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  rpc GetUploadUrl(UploadUrlRequest) returns (UploadUrl) {}
+}

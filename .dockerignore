@@ -1,0 +1,5 @@
+bin/
+internal/pb/
+results/
+.git
+.idea

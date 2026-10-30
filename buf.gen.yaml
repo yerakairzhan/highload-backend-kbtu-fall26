@@ -1,0 +1,18 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: sis2/internal/pb
+
+plugins:
+  - local: protoc-gen-go
+    out: internal/pb
+    opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: internal/pb
+    opt:
+      - paths=source_relative
+      - simple
+inputs:
+  - directory: proto_schema

@@ -1,0 +1,23 @@
+{
+  "target": "json_h1",
+  "scenario": "list_comments",
+  "rate": 2000,
+  "duration_sec": 20,
+  "rep": 3,
+  "requests": 40000,
+  "failed": 0,
+  "dropped": 0,
+  "latency_ms": {
+    "P50": 0.458458,
+    "P90": 0.887333,
+    "P99": 4.2505,
+    "P999": 47.621791,
+    "Max": 90.81675,
+    "Mean": 0.7260940853750032
+  },
+  "wire_sent_bytes_per_req": 494,
+  "wire_received_bytes_per_req": 10423.5564,
+  "negotiated_proto": "HTTP/1.1",
+  "content_type": "application/json",
+  "started_at": "2026-10-30T07:10:52.548057554Z"
+}

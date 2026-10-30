@@ -1,0 +1,36 @@
+syntax = "proto2";
+package blog;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./pb";
+
+message Comment {
+  required uint64 id = 1 [json_name = "id"];
+  required uint64 post_id = 2 [json_name = "post_id"];
+  optional uint64 parent_id = 3 [json_name = "parent_id"]; // absent = top-level comment
+  required uint64 author_id = 4 [json_name = "author_id"];
+  required string author_name = 5 [json_name = "author_name"];
+  required string body = 6 [json_name = "body"];
+  required bool deleted = 7 [json_name = "deleted"]; // tombstone: body is cleared, replies stay attached
+
+  required google.protobuf.Timestamp created_at = 101 [json_name = "created_at"];
+}
+
+message CommentCreate {
+  required uint64 post_id = 1 [json_name = "post_id"];
+  optional uint64 parent_id = 2 [json_name = "parent_id"];
+  required string body = 3 [json_name = "body"];
+  optional string idempotency_key = 4 [json_name = "idempotency_key"];
+}
+
+message CommentListRequest {
+  required uint64 post_id = 1 [json_name = "post_id"];
+  optional string cursor = 2 [json_name = "cursor"]; // last id of the previous page
+  optional int32 limit = 3 [json_name = "limit"];
+}
+
+message CommentList {
+  repeated Comment comments = 1 [json_name = "comments"];
+  optional string next_cursor = 2 [json_name = "next_cursor"];
+}

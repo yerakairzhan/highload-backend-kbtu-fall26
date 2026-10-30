@@ -30,3 +30,7 @@ Thumbs.db
 # Monitoring local state
 monitoring/grafana/data/
 monitoring/prometheus/data/
+
+# SIS #2
+bin/
+internal/pb/

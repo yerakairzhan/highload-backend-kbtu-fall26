@@ -1,0 +1,36 @@
+# SIS #2 rig: server, S3-compatible object storage for images, load generator.
+# CPU limits keep the server and the load generator from fighting over cores;
+# Go sizes GOMAXPROCS from the limit (server: 2).
+
+x-image: &image
+  build: .
+  image: sis2-blog:latest
+
+services:
+  object-storage:
+    # RustFS: S3-compatible, Apache-2.0 (MinIO no longer publishes images).
+    image: rustfs/rustfs:1.0.4
+    environment:
+      RUSTFS_ACCESS_KEY: blog-lab
+      RUSTFS_SECRET_KEY: blog-lab-secret # lab only
+    ports:
+      - "9000:9000" # S3 API: presigned uploads and image URLs are reached here
+
+  blog-platform:
+    <<: *image
+    depends_on: [object-storage]
+    environment:
+      BINARY: blog_platform
+      CONFIG_FILE: default.yaml
+    cpus: 2
+    ports:
+      - "8080:8080"
+
+  loadgen:
+    <<: *image
+    environment:
+      BINARY: loadgen
+    entrypoint: ["sleep", "infinity"]
+    cpus: 4
+    volumes:
+      - ./results:/home/backend/results

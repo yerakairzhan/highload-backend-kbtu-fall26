@@ -1,0 +1,32 @@
+syntax = "proto2";
+package blog;
+
+import "google/protobuf/timestamp.proto";
+import "user.proto";
+
+option go_package = "./pb";
+
+message RegisterRequest {
+  required string username = 1 [json_name = "username"];
+  required string password = 2 [json_name = "password"];
+  optional string display_name = 3 [json_name = "display_name"];
+}
+
+message LoginRequest {
+  required string username = 1 [json_name = "username"];
+  required string password = 2 [json_name = "password"];
+}
+
+message RefreshTokenRequest {
+  required string refresh_token = 1 [json_name = "refresh_token"];
+}
+
+// AuthTokens: a short-lived JWT for every request (Authorization: Bearer) and
+// an opaque refresh token that is replaced each time it is used.
+message AuthTokens {
+  required string access_token = 1 [json_name = "access_token"];
+  required google.protobuf.Timestamp access_expires_at = 2 [json_name = "access_expires_at"];
+  required string refresh_token = 3 [json_name = "refresh_token"];
+  required google.protobuf.Timestamp refresh_expires_at = 4 [json_name = "refresh_expires_at"];
+  required User user = 5 [json_name = "user"];
+}

@@ -1,0 +1,23 @@
+{
+  "target": "grpc",
+  "scenario": "get_post",
+  "rate": 2000,
+  "duration_sec": 20,
+  "rep": 3,
+  "requests": 40000,
+  "failed": 0,
+  "dropped": 0,
+  "latency_ms": {
+    "P50": 0.618208,
+    "P90": 1.365208,
+    "P99": 2.9265,
+    "P999": 4.720458,
+    "Max": 11.344792,
+    "Mean": 0.7672919583750025
+  },
+  "wire_sent_bytes_per_req": 82.53755,
+  "wire_received_bytes_per_req": 10268.796225,
+  "negotiated_proto": "HTTP/2.0",
+  "content_type": "application/grpc",
+  "started_at": "2026-10-30T07:10:25.378168764Z"
+}

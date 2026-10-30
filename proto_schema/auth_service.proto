@@ -1,0 +1,13 @@
+syntax = "proto2";
+package blog;
+
+import "auth.proto";
+
+option go_package = "./pb";
+
+// The only service callable without an access token.
+service AuthService {
+  rpc Register(RegisterRequest) returns (AuthTokens) {}
+  rpc Login(LoginRequest) returns (AuthTokens) {}
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthTokens) {}
+}

@@ -1,0 +1,25 @@
+port: "8080"
+rpc_timeout: 2s
+log:
+  level: INFO
+seed:
+  enabled: true
+  users: 100
+  posts: 1000
+  comments_per_post: 50
+  user_password: lab-password # lab only
+jwt:
+  # lab only; production takes JWT_SECRET from the environment
+  secret: lab-only-secret-change-me
+  access_ttl: 15m
+  refresh_ttl: 720h
+s3:
+  enabled: true
+  endpoint: http://object-storage:9000   # in the compose network
+  public_endpoint: http://localhost:9000 # what a browser on the host can reach
+  region: us-east-1
+  access_key: blog-lab
+  secret_key: blog-lab-secret # lab only; S3_SECRET_KEY overrides
+  bucket: images
+  presign_ttl: 10m
+  max_upload_bytes: 5242880 # 5 MB
